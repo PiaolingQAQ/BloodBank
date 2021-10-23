@@ -31,8 +31,19 @@
             //document.getElementById('files').addEventListener('change', handleFileSelect, false);
             //简单工厂模式
             var id=202110210001;
-            //类构造函数定义
+
+            //定义一个对象模拟接口
+             var BloodObj=function(type){
+                 //方法实现
+                 this.type=type;
+                 return type;
+             }
+            //定义血库子对象作为工厂
             function BloodStock(id,from,type,amount,remark,date){
+
+                //方法继承
+                this.method=BloodObj;
+                this.method(type);
                 this.id=id;
                 this.from=from;
                 this.type=type;
@@ -48,8 +59,9 @@
               remark=$("#remark").val();
               date=Date();
 
-              // 传递参数构建对象
+              // 传递参数构建对象，工厂生产产品
               var newbloodStock=new BloodStock(id,from,type,amount,remark,date);
+
               if(from=="请选择来源……"){
                   alert("请选择来源！");
               }
@@ -83,8 +95,12 @@
                 "                                </a>\n" +
                 "                            </td>\n" +
                 "                        </tr>");
+
             id++;
-          }})
+          }
+              //方法调用
+          alert("你创建的库存血型是"+newbloodStock.method(type));
+          })
         })
 
     </script>
