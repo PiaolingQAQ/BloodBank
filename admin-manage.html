@@ -15,13 +15,72 @@
     <!--[if lt IE 9]>
     <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
     <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+
+
     <![endif]-->
 
     <script src="jquery.js">
     </script>
     <script>
+        //观察者模式
+        //被观察的信号量
+        class Sub{
+            constructor(){
+                this.state = 0;
+                this.observers = [];
+            }
+            // 获取信号量状态
+            getState (){
+                return this.state;
+            }
+            // 设置信号量状态
+            setState(state){
+                this.state = state;
+                this.notify();
+            }
+            // 新增此信号量观察者
+            attach(observer){
+                this.observers.push(observer);
+            }
+            // 通知每个观察者信号量发生改变
+            notify(){
+                this.observers.forEach(observer =>{
+                    observer.update();
+                })
+            }
+        }
+        var id=202110210001;
+        var name=10;
+        $(document).ready(function(){
+            //观察者定义
+             class Observe{
+                 constructor(name,sub){
+                     this.name = name;
+                     this.sub = sub;
+                     this.sub.attach(this);
+                 }
+                 //监听函数，点击添加按钮后update，将数据写入数据库、还原input和select。可以实现添加新功能而与原有
+                 //功能不发生冲突。
+                 update(){
+                     //test
+                     console.log(`${this.name} 观察者更新了state：${this.sub.getState()}`);
+                     //还原状态
+                     $("#type").option=$("#typeinit");
+                     //this.sub.setState(1);
+                     $("#remark").val("");
+                     $("#number").val("");
+                     $("#from").selectedIndex=0;
+                     $("#typeof").selectedIndex=0;
+                 }
+             }
+             // s是o1与信号量关系的实例化
+             let s = new Sub();
+             // 添加观察者实例，并与s绑定
+             let o1 = new Observe('o1',s);
+             // 设置初始状态
+             s.setState(2);
 
-         $(document).ready(function(){
+
              // 操作数据库
              //     function fileChange(e) {
              //         let file = e.target.files[0];
@@ -29,9 +88,9 @@
              //         reader.readAsText(file,"UTF-8");
              //     }
             //document.getElementById('files').addEventListener('change', handleFileSelect, false);
-            //简单工厂模式
-            var id=202110210001;
 
+
+            //简单工厂模式
             //定义一个对象模拟接口
              var BloodObj=function(type){
                  //方法实现
@@ -39,19 +98,22 @@
                  return type;
              }
             //定义血库子对象作为工厂
-            function BloodStock(id,from,type,amount,remark,date){
+            class BloodStock{
+                constructor(id,from,type,amount,remark,date) {
+                    this.id=id;
+                    this.from=from;
+                    this.type=type;
+                    this.amount=amount;
+                    this.remark=remark;
+                    this.date=date;
+                    //方法继承
+                    this.method=BloodObj;
+                    this.method(type);
+                }
 
-                //方法继承
-                this.method=BloodObj;
-                this.method(type);
-                this.id=id;
-                this.from=from;
-                this.type=type;
-                this.amount=amount;
-                this.remark=remark;
-                this.date=date;
             }
           $("#tianjia").click(function(){
+              // s.setState(5);
               var from,type,date,amount,remark;
               from=$("#from option:selected").text();
               type=$("#typeof option:selected").text();
@@ -60,8 +122,8 @@
               date=Date();
 
               // 传递参数构建对象，工厂生产产品
+              //在从数据库中导入数据时，也可以通过简单工厂模式快速生产产品，将数据中的资料导入创建出若干个对象，从而在页面中显示出来
               var newbloodStock=new BloodStock(id,from,type,amount,remark,date);
-
               if(from=="请选择来源……"){
                   alert("请选择来源！");
               }
@@ -81,7 +143,7 @@
                 "                                <input type=\"checkbox\" name=\"\"  lay-skin=\"primary\">\n" +
                 "                            </td>\n" +
                 "                            <td>"+id+"</td>\n" +
-                "                            <td>"+newbloodStock.type+"</td>\n" +
+                "                            <td id='"+name+"'>"+newbloodStock.type+"</td>\n" +
                 "                            <td>"+newbloodStock.from+"</td>\n" +
                 "                            <td>"+newbloodStock.amount+"</td>\n" +
                 "                            <td>"+newbloodStock.remark+"</td>\n" +
@@ -94,12 +156,14 @@
                 "                                    <i class=\"layui-icon\">&#xe640;</i>\n" +
                 "                                </a>\n" +
                 "                            </td>\n" +
-                "                        </tr>");
+                "                        </tr>\n"
 
+              );
             id++;
+            s.setState(5);
           }
               //方法调用
-          alert("你创建的库存血型是"+newbloodStock.method(type));
+
           })
         })
 
@@ -108,6 +172,7 @@
 </head>
 
 <body>
+
 <div class="x-nav">
       <span class="layui-breadcrumb">
         <a href="">首页</a>
@@ -123,18 +188,18 @@
                 <div class="layui-card-body ">
                     <form class="layui-form layui-col-space5">
                         <div class="layui-inline layui-show-xs-block">
-                            <select id="from" required="required">
-                                <option>请选择来源……</option>
-                                <option>全国血库调配</option>
-                                <option>武汉血库</option>
-                                <option>上海血库</option>
-                                <option>北京血库</option>
-                                <option>济南血库</option>
+                            <label for="from"></label><select id="from">
+                                <option value="frominit">请选择来源……</option>
+                                <option value="qg" id="qg">全国血库调配</option>
+                                <option value="wh">武汉血库</option>
+                                <option value="sh">上海血库</option>
+                                <option value="bj">北京血库</option>
+                                <option value="jn">济南血库</option>
                             </select>
                         </div>
                         <div class="layui-inline layui-show-xs-block">
-                            <select id="typeof">
-                                <option>请选择血型……</option>
+                            <label for="typeof"></label><select id="typeof" value="init_value">
+                                <option value="typeinit">请选择血型……</option>
                                 <option>O</option>
                                 <option>A</option>
                                 <option>B</option>
@@ -143,7 +208,7 @@
                             </select>
                         </div>
                         <div class="layui-inline layui-show-xs-block">
-                            <input id="number" type="text" name="num"  placeholder="单位数量" autocomplete="off" class="layui-input">
+                            <input id="number" type="text" name="num" placeholder="单位数量" autocomplete="off" class="layui-input">
                         </div>
                         <div class="layui-inline layui-show-xs-block">
                             <input id="remark" type="text" name="num"  placeholder="备注" autocomplete="off" class="layui-input">
